@@ -1,6 +1,6 @@
 import telebot
 from config import TOKEN
-from bot.handlers import register_handlers
+from travels_project.bot.handlers import register_handlers
 
 bot = telebot.TeleBot(TOKEN)
 
