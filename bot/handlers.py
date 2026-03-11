@@ -1,6 +1,7 @@
 from travels_project.services.country_api import get_country_info
 from travels_project.services.weather_api import get_weather
 from travels_project.services.ai_generator import generate_travel_advice
+from travels_project.services.nlp_service import classify_message, detect_sentiment
 
 
 def register_handlers(bot):
@@ -15,9 +16,8 @@ def register_handlers(bot):
             "/country <страна>\n"
             "/weather <город>\n"
             "/ask <вопрос>\n"
-            "/exit <выход>\n"
+            "/exit - выход из бота\n"
         )
-
     @bot.message_handler(commands=['help'])
     def help_command(message):
         bot.send_message(
@@ -35,7 +35,7 @@ def register_handlers(bot):
         if not country_name:
             bot.send_message(
                 message.chat.id,
-                "🌍 Введите страну.\n\nПример:\n/country Russia"
+                "🌍 Введите страну.\n\nПример:\n/country Россия"
             )
             return
 
@@ -59,6 +59,7 @@ def register_handlers(bot):
 
         bot.send_message(message.chat.id, info)
 
+
     @bot.message_handler(commands=['ask'])
     def ask(message):
         parts = message.text.split(" ", 1)
@@ -73,9 +74,20 @@ def register_handlers(bot):
 
         bot.send_message(message.chat.id, "🤖 Думаю...")
 
+        # --- NLP Анализ ---
+        topic = classify_message(question)  # тема сообщения
+        sentiment = detect_sentiment(question)  # тональность сообщения
+        print(f"Тема: {topic}, Тональность: {sentiment}")  # для логов в PyCharm
+
+        # Генерация ответа через OpenAI
         answer = generate_travel_advice(question)
 
-        bot.send_message(message.chat.id, answer)
+        # Можно добавить в ответ текст о теме и тональности
+        answer_with_meta = f"{answer}\n\n📌 Тема сообщения: {topic}\n📝 Тональность: {sentiment}"
+
+        bot.send_message(message.chat.id, answer_with_meta)
+
+
 
     @bot.message_handler(commands=['exit'])
     def exit_bot(message):
@@ -83,3 +95,12 @@ def register_handlers(bot):
             message.chat.id,
             "👋 Спасибо за использование Travel-бота! До новых встреч."
         )
+
+
+
+
+
+
+
+
+
