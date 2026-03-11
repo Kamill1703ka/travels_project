@@ -1,44 +1,54 @@
 from travels_project.services.country_api import get_country_info
 from travels_project.services.weather_api import get_weather
 from travels_project.services.ai_generator import generate_travel_advice
+from travels_project.services.nlp_service import classify_message, detect_sentiment
 
 
 def register_handlers(bot):
 
     @bot.message_handler(commands=['start'])
     def start(message):
+
         bot.send_message(
             message.chat.id,
             "Привет! 🌍 Я Travel-бот\n\n"
+            "Я умею:\n"
+            "🌤 показывать погоду\n"
+            "🌍 рассказывать о странах\n"
+            "✈ давать советы путешественникам\n\n"
             "Команды:\n"
-            "/help - помощь\n"
-            "/country <страна>\n"
-            "/weather <город>\n"
-            "/ask <вопрос>"
-        )
-
-    @bot.message_handler(commands=['help'])
-    def help_command(message):
-        bot.send_message(
-            message.chat.id,
-            "Примеры команд:\n"
             "/country Italy\n"
             "/weather Rome\n"
             "/ask Что посмотреть в Италии?"
         )
 
+
+    @bot.message_handler(commands=['help'])
+    def help_command(message):
+
+        bot.send_message(
+            message.chat.id,
+            "Примеры:\n\n"
+            "/country Italy\n"
+            "/weather Rome\n"
+            "/ask Что посмотреть в Японии?"
+        )
+
+
     @bot.message_handler(commands=['country'])
     def country(message):
+
         country_name = message.text.replace("/country", "").strip()
 
         if not country_name:
             bot.send_message(
                 message.chat.id,
-                "🌍 Введите страну.\n\nПример:\n/country Italy"
+                "Введите страну.\n\nПример:\n/country Italy"
             )
             return
 
         info = get_country_info(country_name)
+
         bot.send_message(message.chat.id, info)
 
     @bot.message_handler(commands=['weather'])
@@ -49,22 +59,28 @@ def register_handlers(bot):
         if len(parts) < 2:
             bot.send_message(
                 message.chat.id,
-                "❌ Укажите город\nПример: /weather Rome"
+                "Укажите город\n\nПример:\n/weather Rome"
             )
             return
 
-        city_name = parts[1].strip()
-        info = get_weather(city_name)
+        city = parts[1]
+
+        info = get_weather(city)
 
         bot.send_message(message.chat.id, info)
 
+
+    # ---------- ASK (AI) ----------
+
     @bot.message_handler(commands=['ask'])
     def ask(message):
+
         parts = message.text.split(" ", 1)
+
         if len(parts) < 2:
             bot.send_message(
                 message.chat.id,
-                "❌ Напишите вопрос\n\nПример:\n/ask Что посмотреть в Японии?"
+                "Напишите вопрос\n\nПример:\n/ask Что посмотреть в Италии?"
             )
             return
 
@@ -72,21 +88,65 @@ def register_handlers(bot):
 
         bot.send_message(message.chat.id, "🤖 Думаю...")
 
-        # Используем GPT-4 через OpenAI API
         answer = generate_travel_advice(question)
 
         bot.send_message(message.chat.id, answer)
 
-    @bot.message_handler(commands=['exit'])
-    def exit_bot(message):
-        """
-        Команда выхода из бота — отправляет прощальное сообщение.
-        Можно добавить очистку пользовательских данных, если они есть.
-        """
-        # Здесь можно очистить временные данные пользователя, если ведётся
-        # user_sessions.pop(message.chat.id, None)  # пример, если есть словарь сессий
 
-        bot.send_message(
-            message.chat.id,
-            "👋 Спасибо за использование Travel-бота! До новых встреч."
-        )
+    # ---------- УМНОЕ СООБЩЕНИЕ (NLP) ----------
+
+    @bot.message_handler(func=lambda message: True)
+    def smart_reply(message):
+
+        text = message.text
+
+        topic = classify_message(text)
+
+        sentiment = detect_sentiment(text)
+
+        print("Тема:", topic)
+        print("Тональность:", sentiment)
+
+
+        if topic == "weather request":
+
+            bot.send_message(
+                message.chat.id,
+                "Похоже вы спрашиваете про погоду.\n\nПопробуйте:\n/weather Rome"
+            )
+
+
+        elif topic == "country information":
+
+            bot.send_message(
+                message.chat.id,
+                "Похоже вы спрашиваете о стране.\n\nПопробуйте:\n/country Italy"
+            )
+
+
+        elif topic == "travel advice":
+
+            bot.send_message(message.chat.id, "✈ Сейчас подумаю...")
+
+            answer = generate_travel_advice(text)
+
+            bot.send_message(message.chat.id, answer)
+
+
+        elif topic == "greeting":
+
+            bot.send_message(
+                message.chat.id,
+                "Привет! 👋\n\nЯ Travel-бот.\nСпроси меня о путешествиях!"
+            )
+
+
+        else:
+
+            bot.send_message(
+                message.chat.id,
+                "Я не совсем понял запрос.\n\nПопробуйте:\n"
+                "/weather Rome\n"
+                "/country Italy\n"
+                "/ask Что посмотреть в Японии?"
+            )
