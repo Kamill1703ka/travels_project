@@ -18,6 +18,7 @@ def register_handlers(bot):
             "/ask <вопрос>\n"
             "/exit - выход из бота\n"
         )
+
     @bot.message_handler(commands=['help'])
     def help_command(message):
         bot.send_message(
@@ -31,11 +32,10 @@ def register_handlers(bot):
     @bot.message_handler(commands=['country'])
     def country(message):
         country_name = message.text.replace("/country", "").strip()
-
         if not country_name:
             bot.send_message(
                 message.chat.id,
-                "🌍 Введите страну.\n\nПример:\n/country Россия"
+                "🌍 Введите страну.\nПример:\n/country Россия"
             )
             return
 
@@ -44,21 +44,17 @@ def register_handlers(bot):
 
     @bot.message_handler(commands=['weather'])
     def weather(message):
-
         parts = message.text.split(" ", 1)
-
         if len(parts) < 2:
             bot.send_message(
                 message.chat.id,
-                "🌇 Укажите город\nПример: /weather Уфа"
+                "🌇 Укажите город\nПример:\n/weather Уфа"
             )
             return
 
         city_name = parts[1].strip()
         info = get_weather(city_name)
-
         bot.send_message(message.chat.id, info)
-
 
     @bot.message_handler(commands=['ask'])
     def ask(message):
@@ -66,7 +62,7 @@ def register_handlers(bot):
         if len(parts) < 2:
             bot.send_message(
                 message.chat.id,
-                "Напишите вопрос\n\nПример:\n/ask Что посмотреть в Японии?"
+                "Напишите вопрос\nПример:\n/ask Что посмотреть в Японии?"
             )
             return
 
@@ -75,7 +71,7 @@ def register_handlers(bot):
         bot.send_message(message.chat.id, "🤖 Думаю...")
 
         # --- NLP Анализ ---
-        topic = classify_message(question)  # тема сообщения
+        topic = classify_message(question)      # тема сообщения
         sentiment = detect_sentiment(question)  # тональность сообщения
         print(f"Тема: {topic}, Тональность: {sentiment}")  # для логов в PyCharm
 
@@ -87,20 +83,9 @@ def register_handlers(bot):
 
         bot.send_message(message.chat.id, answer_with_meta)
 
-
-
     @bot.message_handler(commands=['exit'])
     def exit_bot(message):
         bot.send_message(
             message.chat.id,
             "👋 Спасибо за использование Travel-бота! До новых встреч."
         )
-
-
-
-
-
-
-
-
-
