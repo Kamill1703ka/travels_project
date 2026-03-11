@@ -9,7 +9,7 @@ def get_weather(city):
         data = response.json()
 
         name = data.get("name", "Неизвестно")
-        temp = data["main"]["temp"]
+        temp = int(data["main"]["temp"])
         description = data["weather"][0]["description"].capitalize()
         humidity = data["main"]["humidity"]
         wind_speed = data["wind"]["speed"]

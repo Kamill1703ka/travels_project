@@ -14,7 +14,8 @@ def register_handlers(bot):
             "/help - помощь\n"
             "/country <страна>\n"
             "/weather <город>\n"
-            "/ask <вопрос>"
+            "/ask <вопрос>\n"
+            "/exit <выход>\n"
         )
 
     @bot.message_handler(commands=['help'])
@@ -22,9 +23,9 @@ def register_handlers(bot):
         bot.send_message(
             message.chat.id,
             "Примеры команд:\n"
-            "/country Italy\n"
-            "/weather Rome\n"
-            "/ask Что посмотреть в Италии?"
+            "/country Россия\n"
+            "/weather Уфа\n"
+            "/ask Что посмотреть в Уфе?"
         )
 
     @bot.message_handler(commands=['country'])
@@ -34,7 +35,7 @@ def register_handlers(bot):
         if not country_name:
             bot.send_message(
                 message.chat.id,
-                "🌍 Введите страну.\n\nПример:\n/country Italy"
+                "🌍 Введите страну.\n\nПример:\n/country Russia"
             )
             return
 
@@ -49,7 +50,7 @@ def register_handlers(bot):
         if len(parts) < 2:
             bot.send_message(
                 message.chat.id,
-                "❌ Укажите город\nПример: /weather Rome"
+                "🌇 Укажите город\nПример: /weather Уфа"
             )
             return
 
@@ -64,7 +65,7 @@ def register_handlers(bot):
         if len(parts) < 2:
             bot.send_message(
                 message.chat.id,
-                "❌ Напишите вопрос\n\nПример:\n/ask Что посмотреть в Японии?"
+                "Напишите вопрос\n\nПример:\n/ask Что посмотреть в Японии?"
             )
             return
 
@@ -72,20 +73,12 @@ def register_handlers(bot):
 
         bot.send_message(message.chat.id, "🤖 Думаю...")
 
-        # Используем GPT-4 через OpenAI API
         answer = generate_travel_advice(question)
 
         bot.send_message(message.chat.id, answer)
 
     @bot.message_handler(commands=['exit'])
     def exit_bot(message):
-        """
-        Команда выхода из бота — отправляет прощальное сообщение.
-        Можно добавить очистку пользовательских данных, если они есть.
-        """
-        # Здесь можно очистить временные данные пользователя, если ведётся
-        # user_sessions.pop(message.chat.id, None)  # пример, если есть словарь сессий
-
         bot.send_message(
             message.chat.id,
             "👋 Спасибо за использование Travel-бота! До новых встреч."
