@@ -16,12 +16,13 @@
 
 <img width="487" height="204" alt="image" src="https://github.com/user-attachments/assets/08379840-0b69-4bdd-98ed-7d9949d75bc5" />
 Главные команды бота:
-/start - запуск работы бота
-/help - помощь
-/country <страна>
-/weather <город>
-/ask <вопрос>
-/exit - выход из бота
+
+- /start - запуск работы бота
+- /help - помощь
+- /country <страна>
+- /weather <город>
+- /ask <вопрос>
+- /exit - выход из бота
 
 
 ---
