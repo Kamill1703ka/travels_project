@@ -1,30 +1,36 @@
-# nlp_service.py
-from transformers import pipeline
+# travels_project/services/nlp_service.py
+from gliclass import GLiClassModel, ZeroShotClassificationPipeline
+from transformers import AutoTokenizer
 
-# Тематическая классификация
-classifier = pipeline(
-    "zero-shot-classification",
-    model="facebook/bart-large-mnli"
+MODEL_NAME = "knowledgator/gliclass-instruct-large-v1.0"
+
+# Загружаем модель и токенизатор
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)
+model = GLiClassModel.from_pretrained(MODEL_NAME, trust_remote_code=True)
+
+# Создаём zero-shot pipeline
+pipeline = ZeroShotClassificationPipeline(
+    model=model,
+    tokenizer=tokenizer,
+    classification_type="multi-label",
+    device=-1  # CPU; для GPU: device=0
 )
 
-topic_labels = ["weather request", "country information", "travel advice", "greeting", "general question"]
+# Наши классы
+LABELS = [
+    "Туризм",
+    "Работа",
+    "Учёба",
+    "Общая информация",
+    "Погода",
+    "Еда"
+]
 
 def classify_message(text: str) -> str:
-    result = classifier(text, topic_labels)
-    return result["labels"][0]
-
-# Тональность
-sentiment_analyzer = pipeline(
-    "sentiment-analysis",
-    model="nlptown/bert-base-multilingual-uncased-sentiment"
-)
-
-def detect_sentiment(text: str) -> str:
-    result = sentiment_analyzer(text)[0]['label']
-    # Переводим звёзды в простую категорию
-    if result in ["1 star", "2 stars"]:
-        return "negative"
-    elif result == "3 stars":
-        return "neutral"
-    else:
-        return "positive"
+    """
+    Классифицирует текст и возвращает только тему с наивысшей вероятностью.
+    """
+    results = pipeline(text, LABELS, threshold=0.0)[0]
+    # Берем класс с наибольшей вероятностью
+    best_label = max(results, key=lambda x: x["score"])["label"]
+    return best_label

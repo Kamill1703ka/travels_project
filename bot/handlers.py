@@ -1,8 +1,7 @@
 from travels_project.services.country_api import get_country_info
 from travels_project.services.weather_api import get_weather
 from travels_project.services.ai_generator import generate_travel_advice
-from travels_project.services.nlp_service import classify_message, detect_sentiment
-
+from travels_project.services.nlp_service import classify_message
 
 def register_handlers(bot):
 
@@ -70,18 +69,21 @@ def register_handlers(bot):
 
         bot.send_message(message.chat.id, "🤖 Думаю...")
 
-        # --- NLP Анализ ---
-        topic = classify_message(question)      # тема сообщения
-        sentiment = detect_sentiment(question)  # тональность сообщения
-        print(f"Тема: {topic}, Тональность: {sentiment}")  # для логов в PyCharm
-
-        # Генерация ответа через OpenAI
         answer = generate_travel_advice(question)
 
-        # Можно добавить в ответ текст о теме и тональности
-        answer_with_meta = f"{answer}\n\n📌 Тема сообщения: {topic}\n📝 Тональность: {sentiment}"
+        bot.send_message(message.chat.id, answer)
 
-        bot.send_message(message.chat.id, answer_with_meta)
+        @bot.message_handler(func=lambda message: True)
+        def classify(message):
+            category = classify_message(message.text)
+            bot.send_message(
+                message.chat.id,
+                f"Категория сообщения: {category}\n\n"
+                "Я могу помочь:\n"
+                "рассказать о стране\n"
+                "показать погоду\n"
+                "ответить на вопрос о путешествиях"
+            )
 
     @bot.message_handler(commands=['exit'])
     def exit_bot(message):
