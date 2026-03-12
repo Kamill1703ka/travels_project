@@ -78,7 +78,7 @@ https://openweathermap.org/api
 
 ---
 
-#🧑‍💻 Использование системы контроля версий
+# Использование системы контроля версий
 
 Проект разработан с использованием системы контроля версий **Git**.
 
@@ -115,5 +115,6 @@ git checkout main
 git pull origin main
 git merge feature/kamilla
 git push origin main
+————————————————————————
 
 
